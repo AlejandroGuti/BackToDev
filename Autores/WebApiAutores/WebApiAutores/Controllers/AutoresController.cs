@@ -6,7 +6,7 @@ using WebApiAutores.Context.Entities;
 namespace WebApiAutores.Controllers
 {
     [ApiController]
-    [Route ("api/autores")]
+    [Route ("api/[controller]")]
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -18,12 +18,26 @@ namespace WebApiAutores.Controllers
         [HttpGet("AutorDetailed/{id:int}")]
         public async Task<ActionResult<Autor>> AutorDetailed(int id)
         {
-            return await _context.Autores.Include(x=>x.Books).FirstOrDefaultAsync(x => x.Id == id);
+            var autor= await _context.Autores.Include(x => x.Books).FirstOrDefaultAsync(x => x.Id == id);
+            if (autor is null)
+                return NotFound();
+            return autor;
         }
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<Autor>> Get(int id)
+        [HttpGet("{id:int}/{name=hi}")]
+        public async Task<ActionResult<Autor>> Get(int id, string name)
         {
-            return await _context.Autores.FirstOrDefaultAsync(x=>x.Id==id);
+            var autor = await _context.Autores.FirstOrDefaultAsync(x=>x.Id==id);
+            if (autor is null)
+                return NotFound();
+            return autor;
+        }
+        [HttpGet("{name}/{id?}")]
+        public async Task<ActionResult<Autor>> Get(string name, int id)
+        {
+            var autor = await _context.Autores.FirstOrDefaultAsync(x => x.Nombre.Contains(name));
+            if (autor is null)
+                return NotFound();
+            return autor;
         }
 
         [HttpGet(Name ="AllAutors")]
